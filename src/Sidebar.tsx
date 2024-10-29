@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Link } from '@tanstack/react-router';
 import { Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
-// Context for sidebar state
 const SidebarContext = createContext<{
   isOpen: boolean;
   isCollapsed: boolean;
@@ -10,7 +9,6 @@ const SidebarContext = createContext<{
   toggleCollapse: () => void;
 } | null>(null);
 
-// Hook to use sidebar context
 const useSidebar = () => {
   const context = useContext(SidebarContext);
   if (!context) {
@@ -19,7 +17,6 @@ const useSidebar = () => {
   return context;
 };
 
-// Sidebar provider component
 export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -37,7 +34,6 @@ export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-// Main Sidebar component
 export const Sidebar: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -70,7 +66,8 @@ export const Sidebar: React.FC<{ children: React.ReactNode }> = ({
         <div className='flex flex-col h-full'>{children}</div>
 
         {/* Collapse toggle button */}
-        <button type='button'
+        <button
+          type='button'
           onClick={toggleCollapse}
           className='absolute top-2 -right-3 bg-gray-400 rounded-full p-1 shadow-md hidden md:block'
         >
@@ -84,28 +81,34 @@ export const Sidebar: React.FC<{ children: React.ReactNode }> = ({
         onClick={toggleSidebar}
         className='fixed top-4 left-4 z-40 md:hidden bg-white p-2 rounded-md shadow-md'
       >
-        {isOpen ? <X size={24} /> : <Menu size={24} />}
+        {isOpen ? (
+          <X
+            className='text-black'
+            size={24}
+          />
+        ) : (
+          <Menu
+            className='text-black'
+            size={24}
+          />
+        )}
       </button>
     </>
   );
 };
 
-// Subcomponents
 export const SidebarHeader: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { isCollapsed } = useSidebar();
 
   const renderCollapsedContent = () => {
-    if (React.isValidElement(children)) {
-      const childText = children.props.children;
-      if (typeof childText === 'string') {
-        return childText.charAt(0).toUpperCase();
-      }
-    } else if (typeof children === 'string') {
-      return children.charAt(0).toUpperCase();
-    }
-    return 'D';
+    return (
+      <img
+        src='https://twinverse.in/favicon.ico'
+        alt='logo'
+      />
+    );
   };
 
   return (

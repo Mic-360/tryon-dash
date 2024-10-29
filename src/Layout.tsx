@@ -8,7 +8,13 @@ export default function Layout() {
       <div className='flex h-screen bg-gray-100'>
         <Sidebar>
           <SidebarHeader>
-            <h1 className='text-xl font-bold text-gray-800'>Dashboard</h1>
+            <div className='flex gap-x-4'>
+              <img
+                src='https://twinverse.in/favicon.ico'
+                alt='logo'
+              />
+              <h1 className='text-xl font-bold text-gray-800'>Dashboard</h1>
+            </div>
           </SidebarHeader>
           <SidebarContent>
             <SidebarLink

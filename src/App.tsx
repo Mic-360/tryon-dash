@@ -14,7 +14,6 @@ export default function HomePage() {
   const [obscuredKeys, setObscuredKeys] = useState<{ [key: string]: boolean }>(
     {}
   );
-  console.log(businesses);
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const apiKey = nanoid();

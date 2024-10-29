@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
+import { Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
+// Context for sidebar state
 const SidebarContext = createContext<{
   isOpen: boolean;
   isCollapsed: boolean;
@@ -9,6 +10,7 @@ const SidebarContext = createContext<{
   toggleCollapse: () => void;
 } | null>(null);
 
+// Hook to use sidebar context
 const useSidebar = () => {
   const context = useContext(SidebarContext);
   if (!context) {
@@ -17,6 +19,7 @@ const useSidebar = () => {
   return context;
 };
 
+// Sidebar provider component
 export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -34,6 +37,7 @@ export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
+// Main Sidebar component
 export const Sidebar: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -49,6 +53,7 @@ export const Sidebar: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <>
+      {/* Mobile overlay */}
       {isMobile && isOpen && (
         <div
           className='fixed inset-0 bg-black bg-opacity-50 z-20'
@@ -56,6 +61,7 @@ export const Sidebar: React.FC<{ children: React.ReactNode }> = ({
         />
       )}
 
+      {/* Sidebar */}
       <aside
         className={`fixed top-0 left-0 z-30 h-full bg-white shadow-lg transform transition-all duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
@@ -63,15 +69,16 @@ export const Sidebar: React.FC<{ children: React.ReactNode }> = ({
       >
         <div className='flex flex-col h-full'>{children}</div>
 
-        <button
-          type='button'
+        {/* Collapse toggle button */}
+        <button type='button'
           onClick={toggleCollapse}
-          className='absolute top-2 -right-3 bg-gray-600 rounded-full p-1 shadow-md hidden md:block'
+          className='absolute top-2 -right-3 bg-gray-400 rounded-full p-1 shadow-md hidden md:block'
         >
           {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
         </button>
       </aside>
 
+      {/* Mobile toggle button */}
       <button
         type='button'
         onClick={toggleSidebar}
@@ -83,6 +90,7 @@ export const Sidebar: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
+// Subcomponents
 export const SidebarHeader: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -125,7 +133,11 @@ export const SidebarFooter: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const { isCollapsed } = useSidebar();
   return (
-    <div className={`p-4 border-t text-gray-800 ${isCollapsed ? 'text-center' : ''}`}>
+    <div
+      className={`p-4 border-t text-gray-800 font-bold ${
+        isCollapsed ? 'text-center' : ''
+      }`}
+    >
       {isCollapsed ? '©' : children}
     </div>
   );
@@ -140,12 +152,12 @@ export const SidebarLink: React.FC<{
   return (
     <Link
       to={to}
-      className={`flex items-center py-2 px-4 text-gray-700 hover:bg-gray-100 rounded transition-colors duration-200 ${
+      className={`flex items-center py-2 px-4 text-gray-800 hover:bg-gray-400 rounded transition-colors duration-200 font-medium ${
         isCollapsed ? 'justify-center' : ''
       }`}
     >
-      {icon}
-      {!isCollapsed && <span className='ml-2'>{children}</span>}
+      <span className={`${isCollapsed ? 'mr-0' : 'mr-2'}`}>{icon}</span>
+      {!isCollapsed && <span>{children}</span>}
     </Link>
   );
 };

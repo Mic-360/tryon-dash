@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { selectAllBusinesses } from './store/businessSlice';
 import {
@@ -11,7 +11,7 @@ import {
   getFilteredRowModel,
   ColumnFiltersState,
 } from '@tanstack/react-table';
-import { Search, Filter, RefreshCw } from 'lucide-react';
+import { Search, Filter, RefreshCw, ArrowUpDown } from 'lucide-react';
 
 type Log = {
   id: string;
@@ -34,7 +34,18 @@ const columns = [
   }),
   columnHelper.accessor('timestamp', {
     cell: (info) => new Date(info.getValue()).toLocaleString(),
-    header: () => <span>Timestamp</span>,
+    header: ({ column }) => {
+      return (
+        <button
+          className='flex items-center'
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Timestamp
+          <ArrowUpDown className='ml-2 h-4 w-4' />
+        </button>
+      );
+    },
+    sortingFn: 'datetime',
   }),
   columnHelper.accessor('message', {
     cell: (info) => info.getValue(),

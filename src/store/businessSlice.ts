@@ -1,12 +1,13 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from './store';
 
-interface Business {
-  id: string;
-  name: string;
-  email: string;
-  apiKey: string;
-  date: string;
+export interface Business {
+  _id: string;
+  businessName: string;
+  businessEmail: string;
+  businessCreated_at: string;
+  businessAPIKey: string;
+  businessPassword: string;
 }
 
 interface BusinessState {
@@ -14,7 +15,7 @@ interface BusinessState {
 }
 
 const initialState: BusinessState = {
-  businesses: [],
+  businesses: []
 };
 
 export const businessSlice = createSlice({
@@ -24,12 +25,14 @@ export const businessSlice = createSlice({
     addBusiness: (state, action: PayloadAction<Business>) => {
       state.businesses.push(action.payload);
     },
-  },
+    setBusinesses: (state, action: PayloadAction<Business[]>) => {
+      state.businesses = action.payload;
+    }
+  }
 });
 
-export const { addBusiness } = businessSlice.actions;
+export const { addBusiness, setBusinesses } = businessSlice.actions;
 
-export const selectAllBusinesses = (state: RootState) =>
-  state.business.businesses;
+export const selectAllBusinesses = (state: RootState) => state.business.businesses;
 
 export default businessSlice.reducer;

@@ -1,8 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { nanoid } from '@reduxjs/toolkit';
-import { addBusiness, selectAllBusinesses } from './store/businessSlice';
+import {
+  addBusiness,
+  selectAllBusinesses,
+  setBusinesses,
+} from './store/businessSlice';
 import { PlusIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
+
+type Business = {
+  _id: string;
+  businessName: string;
+  businessEmail: string;
+  businessCreated_at: string;
+  businessAPIKey: string;
+  businessPassword: string;
+};
 
 export default function HomePage() {
   const dispatch = useDispatch();
@@ -14,16 +26,67 @@ export default function HomePage() {
   const [obscuredKeys, setObscuredKeys] = useState<{ [key: string]: boolean }>(
     {}
   );
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchBusinesses();
+  }, []);
+
+  const fetchBusinesses = async () => {
+    try {
+      const response = await fetch(
+        'http://twinversepc.duckdns.org:8000/api/v1/internal/getAllBusinesses'
+      );
+      if (!response.ok) {
+        throw new Error('Failed to fetch businesses');
+      }
+      const data: Business[] = await response.json();
+      dispatch(setBusinesses(data));
+    } catch (err) {
+      setError('Failed to fetch businesses. Please try again later.');
+      console.error('Error fetching businesses:', err);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const apiKey = nanoid();
-    const date = new Date().toISOString();
-    dispatch(addBusiness({ id: nanoid(), name, email, apiKey, date }));
-    setName('');
-    setEmail('');
-    setPassword('');
-    setIsModalOpen(false);
-    alert(`New business created! API Key: ${apiKey}`);
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        'http://twinversepc.duckdns.org:8000/api/v1/internal/createBusiness',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            businessName: name,
+            businessEmail: email,
+            businessPassword: password,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to create business');
+      }
+
+      const newBusiness: Business = await response.json();
+      dispatch(addBusiness(newBusiness));
+      setName('');
+      setEmail('');
+      setPassword('');
+      setIsModalOpen(false);
+      alert(`New business created! API Key: ${newBusiness.businessAPIKey}`);
+    } catch (err) {
+      setError('Failed to create business. Please try again.');
+      console.error('Error creating business:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const toggleObscure = (id: string) => {
@@ -33,23 +96,25 @@ export default function HomePage() {
   return (
     <div className='container mx-auto px-4 py-8'>
       <div className='flex justify-between items-center mb-8'>
-        <div>
-          <h1 className='text-3xl font-bold text-gray-800 mb-2'>
-            Business Records
-          </h1>
-          <p className='text-gray-600'>
-            Manage and track all your business records
-          </p>
-        </div>
+        <h1 className='text-3xl font-bold text-gray-800'>Dashboard</h1>
         <button
-          type='button'
           onClick={() => setIsModalOpen(true)}
-          className='bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center justify-center'
+          className='bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50'
         >
           <PlusIcon className='inline-block mr-2 h-5 w-5' />
           Add Business
         </button>
       </div>
+
+      {error && (
+        <div
+          className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4'
+          role='alert'
+        >
+          <strong className='font-bold'>Error!</strong>
+          <span className='block sm:inline'> {error}</span>
+        </div>
+      )}
 
       {/* Business Table */}
       <div className='bg-white shadow-xl rounded-lg overflow-hidden'>
@@ -63,51 +128,46 @@ export default function HomePage() {
                 Email
               </th>
               <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                API Key
+                Created At
               </th>
               <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                Date
+                API Key
               </th>
             </tr>
           </thead>
           <tbody className='bg-white divide-y divide-gray-200'>
             {businesses.map((business) => (
               <tr
-                key={business.id}
+                key={business._id}
                 className='hover:bg-gray-50 transition-colors duration-200'
               >
                 <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>
-                  {business.name}
+                  {business.businessName}
                 </td>
                 <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                  {business.email}
+                  {business.businessEmail}
+                </td>
+                <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                  {new Date(business.businessCreated_at).toLocaleString()}
                 </td>
                 <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
                   <div className='flex items-center'>
                     <span className='mr-2 font-mono'>
-                      {obscuredKeys[business.id]
-                        ? business.apiKey
-                        : '•'.repeat(business.apiKey.length)}
+                      {obscuredKeys[business._id]
+                        ? business.businessAPIKey
+                        : '•'.repeat(business.businessAPIKey.length)}
                     </span>
                     <button
-                      type='button'
-                      onClick={() => toggleObscure(business.id)}
+                      onClick={() => toggleObscure(business._id)}
                       className='text-gray-400 hover:text-gray-600 focus:outline-none'
                     >
-                      {obscuredKeys[business.id] ? (
+                      {obscuredKeys[business._id] ? (
                         <EyeOffIcon className='h-5 w-5' />
                       ) : (
                         <EyeIcon className='h-5 w-5' />
                       )}
                     </button>
                   </div>
-                </td>
-                <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                  {new Date(business.date).toLocaleDateString('en-GB', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: '2-digit',
-                  })}
                 </td>
               </tr>
             ))}
@@ -185,9 +245,12 @@ export default function HomePage() {
                   </button>
                   <button
                     type='submit'
-                    className='px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                    disabled={isLoading}
+                    className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                      isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                   >
-                    Create Business
+                    {isLoading ? 'Creating...' : 'Create Business'}
                   </button>
                 </div>
               </form>

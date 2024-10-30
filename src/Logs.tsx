@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { selectAllBusinesses } from './store/businessSlice';
 import {
   createColumnHelper,
   flexRender,
@@ -11,53 +9,57 @@ import {
   getFilteredRowModel,
   ColumnFiltersState,
 } from '@tanstack/react-table';
-import { Search, Filter, RefreshCw, ArrowUpDown } from 'lucide-react';
+import { Search, Filter, RefreshCw } from 'lucide-react';
 
 type Log = {
-  id: string;
-  businessName: string;
+  _id: string;
+  personImage: string;
+  clothImage: string;
   clothType: string;
-  timestamp: string;
-  message: string;
+  num_inference_steps: number;
+  seed: number;
+  guidance_scale: number;
+  resultImage: string;
+  productId: string;
+  userId: string;
+  businessId: string;
+  created_at: string;
 };
 
 const columnHelper = createColumnHelper<Log>();
 
 const columns = [
-  columnHelper.accessor('businessName', {
+  columnHelper.accessor('businessId', {
     cell: (info) => info.getValue(),
-    header: () => <span>Business Name</span>,
+    header: () => <span>Business ID</span>,
   }),
   columnHelper.accessor('clothType', {
     cell: (info) => info.getValue(),
     header: () => <span>Cloth Type</span>,
   }),
-  columnHelper.accessor('timestamp', {
+  columnHelper.accessor('created_at', {
     cell: (info) => new Date(info.getValue()).toLocaleString(),
-    header: ({ column }) => {
-      return (
-        <button
-          className='flex items-center'
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-          Timestamp
-          <ArrowUpDown className='ml-2 h-4 w-4' />
-        </button>
-      );
-    },
-    sortingFn: 'datetime',
+    header: () => <span>Timestamp</span>,
   }),
-  columnHelper.accessor('message', {
+  columnHelper.accessor('num_inference_steps', {
     cell: (info) => info.getValue(),
-    header: () => <span>Message</span>,
+    header: () => <span>Inference Steps</span>,
+  }),
+  columnHelper.accessor('seed', {
+    cell: (info) => info.getValue(),
+    header: () => <span>Seed</span>,
+  }),
+  columnHelper.accessor('guidance_scale', {
+    cell: (info) => info.getValue(),
+    header: () => <span>Guidance Scale</span>,
   }),
 ];
 
 export default function LogsPage() {
-  const businesses = useSelector(selectAllBusinesses);
   const [logs, setLogs] = useState<Log[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const table = useReactTable({
     data: logs,
@@ -73,25 +75,30 @@ export default function LogsPage() {
     },
   });
 
-  useEffect(() => {
-    // Simulating log streaming
-    const interval = setInterval(() => {
-      const newLog: Log = {
-        id: Math.random().toString(36).substr(2, 9),
-        businessName:
-          businesses[Math.floor(Math.random() * businesses.length)]?.name ||
-          'Unknown',
-        clothType: ['T-Shirt', 'Jeans', 'Dress', 'Jacket'][
-          Math.floor(Math.random() * 4)
-        ],
-        timestamp: new Date().toISOString(),
-        message: `Log message ${Math.floor(Math.random() * 1000)}`,
-      };
-      setLogs((prevLogs) => [...prevLogs, newLog].slice(-100)); // Keep only the last 100 logs
-    }, 2000);
+  const fetchLogs = async () => {
+    try {
+      const response = await fetch(
+        'http://twinversepc.duckdns.org:8000/api/v1/internal/getAllLogs'
+      );
+      if (!response.ok) {
+        throw new Error('Failed to fetch logs');
+      }
+      const data: Log[] = await response.json();
+      setLogs(data);
+      setError(null);
+    } catch (err) {
+      setError('Failed to fetch logs. Please try again later.');
+      console.error('Error fetching logs:', err);
+    }
+  };
 
-    return () => clearInterval(interval);
-  }, [businesses]);
+  useEffect(() => {
+    fetchLogs(); // Initial fetch
+
+    const intervalId = setInterval(fetchLogs, 5000); // Fetch every 5 seconds
+
+    return () => clearInterval(intervalId); // Clean up on unmount
+  }, []);
 
   return (
     <div className='container mx-auto px-4 py-8'>
@@ -102,21 +109,31 @@ export default function LogsPage() {
         <p className='text-gray-600'>Real-time log streaming and analysis</p>
       </div>
 
+      {error && (
+        <div
+          className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4'
+          role='alert'
+        >
+          <strong className='font-bold'>Error!</strong>
+          <span className='block sm:inline'> {error}</span>
+        </div>
+      )}
+
       <div className='bg-white shadow-lg rounded-lg overflow-hidden'>
         <div className='p-6 bg-gray-50 border-b border-gray-200'>
           <div className='flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 md:space-x-4'>
             <div className='flex-1 flex items-center space-x-4'>
               <div className='relative flex-1'>
                 <input
-                  placeholder='Filter business names...'
+                  placeholder='Filter business IDs...'
                   value={
                     (table
-                      .getColumn('businessName')
+                      .getColumn('businessId')
                       ?.getFilterValue() as string) ?? ''
                   }
                   onChange={(event) =>
                     table
-                      .getColumn('businessName')
+                      .getColumn('businessId')
                       ?.setFilterValue(event.target.value)
                   }
                   className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500'

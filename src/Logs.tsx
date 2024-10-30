@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
 import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  getSortedRowModel,
-  SortingState,
-  getFilteredRowModel,
-  ColumnFiltersState,
-} from '@tanstack/react-table';
-import { Search, Filter, RefreshCw } from 'lucide-react';
+  RefreshCw,
+  User,
+  Shirt,
+  Box,
+  Calendar,
+  Hash,
+  Sliders,
+  Zap,
+  Image as ImageIcon,
+  CheckCircle,
+  XCircle,
+} from 'lucide-react';
 
-type Log = {
+interface Log {
   _id: string;
   personImage: string;
   clothImage: string;
@@ -24,217 +26,222 @@ type Log = {
   userId: string;
   businessId: string;
   created_at: string;
-};
-
-const columnHelper = createColumnHelper<Log>();
-
-const columns = [
-  columnHelper.accessor('businessId', {
-    cell: (info) => info.getValue(),
-    header: () => <span>Business ID</span>,
-  }),
-  columnHelper.accessor('clothType', {
-    cell: (info) => info.getValue(),
-    header: () => <span>Cloth Type</span>,
-  }),
-  columnHelper.accessor('created_at', {
-    cell: (info) => new Date(info.getValue()).toLocaleString(),
-    header: () => <span>Timestamp</span>,
-  }),
-  columnHelper.accessor('num_inference_steps', {
-    cell: (info) => info.getValue(),
-    header: () => <span>Inference Steps</span>,
-  }),
-  columnHelper.accessor('seed', {
-    cell: (info) => info.getValue(),
-    header: () => <span>Seed</span>,
-  }),
-  columnHelper.accessor('guidance_scale', {
-    cell: (info) => info.getValue(),
-    header: () => <span>Guidance Scale</span>,
-  }),
-];
+}
 
 export default function LogsPage() {
   const [logs, setLogs] = useState<Log[]>([]);
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const table = useReactTable({
-    data: logs,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    state: {
-      sorting,
-      columnFilters,
-    },
-  });
-
   const fetchLogs = async () => {
+    setIsLoading(true);
+    setError(null);
     try {
       const response = await fetch(
         'http://twinversepc.duckdns.org:8000/api/v1/internal/getAllLogs'
       );
-      if (!response.ok) {
-        throw new Error('Failed to fetch logs');
-      }
+      if (!response.ok) throw new Error('Failed to fetch logs');
       const data: Log[] = await response.json();
       setLogs(data);
-      setError(null);
     } catch (err) {
       setError('Failed to fetch logs. Please try again later.');
       console.error('Error fetching logs:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchLogs(); // Initial fetch
-
-    const intervalId = setInterval(fetchLogs, 5000); // Fetch every 5 seconds
-
-    return () => clearInterval(intervalId); // Clean up on unmount
+    fetchLogs();
   }, []);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   return (
     <div className='container mx-auto px-4 py-8'>
-      <div className='mb-8'>
-        <h1 className='text-3xl font-bold text-gray-800 mb-2'>
-          Logs Dashboard
-        </h1>
-        <p className='text-gray-600'>Real-time log streaming and analysis</p>
+      <div className='flex justify-between items-center mb-8'>
+        <div>
+          <h1 className='text-3xl font-bold text-gray-800'>Logs Dashboard</h1>
+          <p className='text-gray-500 mt-2'>
+            Real-time processing logs and analytics
+          </p>
+        </div>
+        <button
+          type='button'
+          onClick={fetchLogs}
+          className='bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center'
+        >
+          <RefreshCw className='mr-2 h-5 w-5' />
+          Refresh Logs
+        </button>
       </div>
 
-      {error && (
-        <div
-          className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4'
-          role='alert'
-        >
-          <strong className='font-bold'>Error!</strong>
-          <span className='block sm:inline'> {error}</span>
+      {isLoading && (
+        <div className='text-center py-12'>
+          <RefreshCw className='h-8 w-8 animate-spin mx-auto text-blue-500 mb-4' />
+          <p className='text-gray-500 text-lg'>Loading logs...</p>
         </div>
       )}
 
-      <div className='bg-white shadow-lg rounded-lg overflow-hidden'>
-        <div className='p-6 bg-gray-50 border-b border-gray-200'>
-          <div className='flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0 md:space-x-4'>
-            <div className='flex-1 flex items-center space-x-4'>
-              <div className='relative flex-1'>
-                <input
-                  placeholder='Filter business IDs...'
-                  value={
-                    (table
-                      .getColumn('businessId')
-                      ?.getFilterValue() as string) ?? ''
-                  }
-                  onChange={(event) =>
-                    table
-                      .getColumn('businessId')
-                      ?.setFilterValue(event.target.value)
-                  }
-                  className='w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500'
-                />
-                <Search
-                  className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400'
-                  size={18}
-                />
-              </div>
-              <div className='relative'>
-                <select
-                  value={
-                    (table
-                      .getColumn('clothType')
-                      ?.getFilterValue() as string) ?? ''
-                  }
-                  onChange={(event) =>
-                    table
-                      .getColumn('clothType')
-                      ?.setFilterValue(event.target.value)
-                  }
-                  className='appearance-none w-full pl-10 pr-8 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500'
-                >
-                  <option value=''>All Cloth Types</option>
-                  <option value='T-Shirt'>T-Shirt</option>
-                  <option value='Jeans'>Jeans</option>
-                  <option value='Dress'>Dress</option>
-                  <option value='Jacket'>Jacket</option>
-                </select>
-                <Filter
-                  className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400'
-                  size={18}
-                />
+      {error && (
+        <div
+          className='bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded mb-4'
+          role='alert'
+        >
+          <div className='flex items-center'>
+            <XCircle className='h-5 w-5 mr-2' />
+            <span>{error}</span>
+          </div>
+        </div>
+      )}
+
+      <div className='space-y-4'>
+        {logs.map((log) => (
+          <div
+            key={log._id}
+            className='bg-white rounded-lg shadow-lg overflow-hidden border border-gray-100'
+          >
+            <div className='px-6 py-4 border-b border-gray-100'>
+              <div className='flex items-center justify-between'>
+                <div className='flex items-center space-x-4'>
+                  <span className='text-lg font-semibold text-gray-800'>
+                    Log #{log._id.slice(-6)}
+                  </span>
+                  <span className='px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800'>
+                    {log.clothType}
+                  </span>
+                </div>
+                <div className='flex items-center space-x-2 text-sm text-gray-500'>
+                  <Calendar className='h-4 w-4' />
+                  <span>{formatDate(log.created_at)}</span>
+                </div>
               </div>
             </div>
-            <button
-              onClick={() => setLogs([])}
-              className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-            >
-              <RefreshCw
-                className='mr-2'
-                size={18}
-              />
-              Clear Logs
-            </button>
+            <div className='px-6 py-4'>
+              <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+                <div className='space-y-4'>
+                  <div className='flex items-center space-x-3 text-gray-700'>
+                    <User className='h-5 w-5 text-blue-500' />
+                    <div>
+                      <p className='text-sm font-medium text-gray-500'>
+                        User ID
+                      </p>
+                      <p className='font-medium'>{log.userId}</p>
+                    </div>
+                  </div>
+                  <div className='flex items-center space-x-3 text-gray-700'>
+                    <Box className='h-5 w-5 text-purple-500' />
+                    <div>
+                      <p className='text-sm font-medium text-gray-500'>
+                        Business ID
+                      </p>
+                      <p className='font-medium'>{log.businessId}</p>
+                    </div>
+                  </div>
+                  <div className='flex items-center space-x-3 text-gray-700'>
+                    <Shirt className='h-5 w-5 text-green-500' />
+                    <div>
+                      <p className='text-sm font-medium text-gray-500'>
+                        Product ID
+                      </p>
+                      <p className='font-medium'>{log.productId}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className='space-y-4'>
+                  <div className='flex items-center space-x-3 text-gray-700'>
+                    <Hash className='h-5 w-5 text-orange-500' />
+                    <div>
+                      <p className='text-sm font-medium text-gray-500'>
+                        Inference Steps
+                      </p>
+                      <p className='font-medium'>{log.num_inference_steps}</p>
+                    </div>
+                  </div>
+                  <div className='flex items-center space-x-3 text-gray-700'>
+                    <Zap className='h-5 w-5 text-yellow-500' />
+                    <div>
+                      <p className='text-sm font-medium text-gray-500'>Seed</p>
+                      <p className='font-medium'>{log.seed}</p>
+                    </div>
+                  </div>
+                  <div className='flex items-center space-x-3 text-gray-700'>
+                    <Sliders className='h-5 w-5 text-red-500' />
+                    <div>
+                      <p className='text-sm font-medium text-gray-500'>
+                        Guidance Scale
+                      </p>
+                      <p className='font-medium'>{log.guidance_scale}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className='grid grid-cols-3 gap-4'>
+                  <div className='space-y-2'>
+                    <p className='text-sm font-medium text-gray-500 flex items-center'>
+                      <ImageIcon className='h-4 w-4 mr-1 text-blue-500' />
+                      Person
+                    </p>
+                    <img
+                      src={log.personImage}
+                      alt='Person'
+                      className='w-full h-24 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200'
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <p className='text-sm font-medium text-gray-500 flex items-center'>
+                      <ImageIcon className='h-4 w-4 mr-1 text-purple-500' />
+                      Cloth
+                    </p>
+                    <img
+                      src={log.clothImage}
+                      alt='Cloth'
+                      className='w-full h-24 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200'
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <p className='text-sm font-medium text-gray-500 flex items-center'>
+                      <ImageIcon className='h-4 w-4 mr-1 text-green-500' />
+                      Result
+                    </p>
+                    <img
+                      src={log.resultImage}
+                      alt='Result'
+                      className='w-full h-24 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200'
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className='px-6 py-3 bg-gray-50 border-t border-gray-100'>
+              <div className='flex justify-between items-center'>
+                <div className='flex items-center space-x-2'>
+                  <CheckCircle className='h-4 w-4 text-green-500' />
+                  <span className='text-sm text-gray-600'>
+                    Processing Complete
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-
-        <div className='overflow-x-auto'>
-          <table className='min-w-full divide-y divide-gray-200'>
-            <thead className='bg-gray-50'>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody className='bg-white divide-y divide-gray-200'>
-              {table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className='hover:bg-gray-50 transition-colors duration-150 ease-in-out'
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td
-                      key={cell.id}
-                      className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {logs.length === 0 && (
-          <div className='text-center py-12'>
-            <p className='text-gray-500 text-lg'>
-              No logs available. New logs will appear here as they are
-              generated.
-            </p>
-          </div>
-        )}
+        ))}
       </div>
+
+      {!isLoading && logs.length === 0 && (
+        <div className='text-center py-12 bg-white rounded-lg shadow-lg'>
+          <Box className='h-12 w-12 text-gray-400 mx-auto mb-4' />
+          <p className='text-gray-500 text-lg'>No logs available.</p>
+          <p className='text-gray-400'>Click refresh to check for new logs.</p>
+        </div>
+      )}
     </div>
   );
 }

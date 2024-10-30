@@ -30,24 +30,24 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchBusinesses();
-  }, []);
+      const fetchBusinesses = async () => {
+        try {
+          const response = await fetch(
+            'http://twinversepc.duckdns.org:8000/api/v1/internal/getAllBusinesses'
+          );
+          if (!response.ok) {
+            throw new Error('Failed to fetch businesses');
+          }
+          const data: Business[] = await response.json();
+          dispatch(setBusinesses(data));
+        } catch (err) {
+          setError('Failed to fetch businesses. Please try again later.');
+          console.error('Error fetching businesses:', err);
+        }
+      };
 
-  const fetchBusinesses = async () => {
-    try {
-      const response = await fetch(
-        'http://twinversepc.duckdns.org:8000/api/v1/internal/getAllBusinesses'
-      );
-      if (!response.ok) {
-        throw new Error('Failed to fetch businesses');
-      }
-      const data: Business[] = await response.json();
-      dispatch(setBusinesses(data));
-    } catch (err) {
-      setError('Failed to fetch businesses. Please try again later.');
-      console.error('Error fetching businesses:', err);
-    }
-  };
+      fetchBusinesses();
+    }, [dispatch]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,7 +83,7 @@ export default function HomePage() {
       alert(`New business created! API Key: ${newBusiness.businessAPIKey}`);
     } catch (err) {
       setError('Failed to create business. Please try again.');
-      console.error('Error creating business:', err);
+      alert(err);
     } finally {
       setIsLoading(false);
     }
@@ -98,6 +98,7 @@ export default function HomePage() {
       <div className='flex justify-between items-center mb-8'>
         <h1 className='text-3xl font-bold text-gray-800'>Dashboard</h1>
         <button
+          type='button'
           onClick={() => setIsModalOpen(true)}
           className='bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50'
         >
@@ -105,7 +106,6 @@ export default function HomePage() {
           Add Business
         </button>
       </div>
-
       {error && (
         <div
           className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4'
@@ -115,8 +115,6 @@ export default function HomePage() {
           <span className='block sm:inline'> {error}</span>
         </div>
       )}
-
-      {/* Business Table */}
       <div className='bg-white shadow-xl rounded-lg overflow-hidden'>
         <table className='min-w-full divide-y divide-gray-200'>
           <thead className='bg-gray-50'>
@@ -174,8 +172,6 @@ export default function HomePage() {
           </tbody>
         </table>
       </div>
-
-      {/* Modal */}
       {isModalOpen && (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50'>
           <div className='bg-white rounded-lg shadow-xl max-w-md w-full'>

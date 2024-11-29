@@ -33,7 +33,6 @@ export default function LogsPage() {
   const [logs, setLogs] = useState<Log[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [expandedLog, setExpandedLog] = useState<string | null>(null);
   const [userIdFilter, setUserIdFilter] = useState('');
   const [businessIdFilter, setBusinessIdFilter] = useState('');
   const [productIdFilter, setProductIdFilter] = useState('');
@@ -63,7 +62,7 @@ export default function LogsPage() {
 
   useEffect(() => {
     fetchLogs();
-    const interval = setInterval(fetchLogs, 5000);
+    const interval = setInterval(fetchLogs, 60000);
     return () => clearInterval(interval);
   }, []);
 

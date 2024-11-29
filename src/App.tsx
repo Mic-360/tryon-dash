@@ -33,7 +33,7 @@ export default function HomePage() {
       const fetchBusinesses = async () => {
         try {
           const response = await fetch(
-            'http://twinversepc.duckdns.org:8000/api/v1/internal/getAllBusinesses'
+            'https://twinverses.in/api/v1/internal/getAllBusinesses'
           );
           if (!response.ok) {
             throw new Error('Failed to fetch businesses');
@@ -56,7 +56,7 @@ export default function HomePage() {
 
     try {
       const response = await fetch(
-        'http://twinversepc.duckdns.org:8000/api/v1/internal/createBusiness',
+        'https://twinverses.in/api/v1/internal/createBusiness',
         {
           method: 'POST',
           headers: {

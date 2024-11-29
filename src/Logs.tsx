@@ -48,7 +48,7 @@ export default function LogsPage() {
     setError(null);
     try {
       const response = await fetch(
-        'http://twinversepc.duckdns.org:8000/api/v1/internal/getAllLogs'
+        'https://twinverses.in/api/v1/internal/getAllLogs'
       );
       if (!response.ok) throw new Error('Failed to fetch logs');
       const data: Log[] = await response.json();
@@ -342,19 +342,6 @@ export default function LogsPage() {
                     Processing Complete
                   </span>
                 </div>
-                <button
-                  onClick={() =>
-                    setExpandedLog(expandedLog === log._id ? null : log._id)
-                  }
-                  className='text-blue-500 hover:text-blue-600 flex items-center text-sm font-medium'
-                >
-                  {expandedLog === log._id ? 'Show Less' : 'Show More'}
-                  <ChevronRight
-                    className={`h-4 w-4 ml-1 transition-transform duration-200 ${
-                      expandedLog === log._id ? 'transform rotate-90' : ''
-                    }`}
-                  />
-                </button>
               </div>
             </div>
           </div>

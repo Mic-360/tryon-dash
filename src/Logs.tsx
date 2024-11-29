@@ -206,7 +206,7 @@ export default function LogsPage() {
       )}
 
       <div className='space-y-4'>
-        {filteredLogs.map((log) => (
+        {filteredLogs.reverse().map((log) => (
           <div
             key={log._id}
             className='bg-white rounded-lg shadow-lg overflow-hidden border border-gray-100'
@@ -300,9 +300,9 @@ export default function LogsPage() {
                       Person
                     </p>
                     <img
-                      src={log.personImage}
+                      src={"https://devbackendpersonimage.s3.ap-south-1.amazonaws.com/"+log.personImage}
                       alt='Person'
-                      className='w-full h-24 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200'
+                      className='w-full h-24 object-contain rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200'
                     />
                   </div>
                   <div className='space-y-2'>
@@ -311,9 +311,9 @@ export default function LogsPage() {
                       Cloth
                     </p>
                     <img
-                      src={log.clothImage}
+                      src={"https://devbackendclothimage.s3.ap-south-1.amazonaws.com/"+log.clothImage}
                       alt='Cloth'
-                      className='w-full h-24 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200'
+                      className='w-full h-24 object-contain rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200'
                     />
                   </div>
                   <div className='space-y-2'>
@@ -322,9 +322,9 @@ export default function LogsPage() {
                       Result
                     </p>
                     <img
-                      src={log.resultImage}
+                      src={"https://devbackendresultimage.s3.ap-south-1.amazonaws.com/"+log.resultImage}
                       alt='Result'
-                      className='w-full h-24 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200'
+                      className='w-full h-24 object-contain rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200'
                     />
                   </div>
                 </div>

@@ -11,7 +11,6 @@ import {
   Image as ImageIcon,
   CheckCircle,
   XCircle,
-  ChevronRight,
 } from 'lucide-react';
 
 interface Log {

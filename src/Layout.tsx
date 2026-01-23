@@ -10,7 +10,7 @@ export default function Layout() {
           <SidebarHeader>
             <div className='flex gap-x-4'>
               <img
-                src='https://twinverse.in/favicon.ico'
+                src='https://www.twinverse.in/logo.jpeg'
                 alt='logo'
               />
               <h1 className='text-xl font-bold text-gray-800'>Dashboard</h1>

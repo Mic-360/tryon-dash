@@ -1,50 +1,72 @@
-# React + TypeScript + Vite
+# TryOn Dash - Internal Admin Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+TryOn Dash is an internal monitoring and management platform for Twinverse Tech's virtual try-on services. It empowers admins to manage business partnerships and monitor processing logs in real-time.
 
-Currently, two official plugins are available:
+![TryOn Dash UI](https://twinverse.in/favicon.ico)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Key Features
 
-## Expanding the ESLint configuration
+### 🏢 Business Management
+- **Centralized Directory**: View all registered businesses with their associated metadata.
+- **Seamless Registration**: Add new business partners via a dedicated interface.
+- **API Key Control**: Manage at-a-glance or obscure sensitive API keys for security.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+### 📊 Logs & Analytics
+- **Live Stream**: Auto-refreshing logs (every 60s) to monitor visual try-on requests.
+- **Deep-Dive Filters**: Filter logs by User ID, Business ID, Product ID, Cloth Type, and technical parameters (Seed, Guidance Scale, etc.).
+- **Visual Verification**: Direct visual comparison of:
+  - **Person Image**: The base model/user input.
+  - **Cloth Image**: The selected garment.
+  - **Result Image**: The AI-generated output.
 
-- Configure the top-level `parserOptions` property like this:
+## 🛠️ Tech Stack
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- **Frontend**: [React](https://reactjs.org/) with [TypeScript](https://www.typescriptlang.org/)
+- **Build Tool**: [Vite](https://vitejs.dev/)
+- **Routing**: [TanStack Router](https://tanstack.com/router)
+- **State Management**: [Redux Toolkit](https://redux-toolkit.js.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Data Table**: [TanStack Table](https://tanstack.com/table)
+
+## 📂 Project Structure
+
+- `src/store`: Redux store and slices for global state (Businesses).
+- `src/Layout.tsx`: Main application wrapper with a responsive sidebar.
+- `src/Sidebar.tsx`: Sidebar component with collapse/expand and mobile-responsive overlays.
+- `src/App.tsx`: Home dashboard for business management.
+- `src/Logs.tsx`: Real-time logging dashboard with advanced filtering.
+
+## ⚙️ Getting Started
+
+### Prerequisites
+
+- Node.js (Active LTS)
+- Yarn (`v4.5.1` recommended)
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   yarn install
+   ```
+
+### Development
+
+Run the local development server:
+```bash
+yarn dev
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+### Build
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+Create a production build:
+```bash
+yarn build
 ```
+
+The application connects to the production backend at `https://twinverses.in` by default (see `src/config.ts`).
+
+---
+Developed by **[Twinverse Tech](https://twinverse.in)**
